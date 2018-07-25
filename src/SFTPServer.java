@@ -27,6 +27,7 @@ class SFTPServer {
 
 class Client extends Thread {
     private String user;
+    private Boolean bIsAuthenticated;
     private BufferedReader input;
     private DataOutputStream output;
 
@@ -41,9 +42,13 @@ class Client extends Thread {
         //noinspection InfiniteLoopStatement
         while(true) {
             try {
-                String clientSentence = this.readInput();
-                String capitalizedSentence = clientSentence.toUpperCase() + '\n';
-                this.writeOutput(capitalizedSentence);
+                String command = this.readCommand();
+
+                // Check to see if we have read in a command.
+                if (command.length() > 0) {
+                    String capitalizedSentence = command.toUpperCase() + '\n';
+                    this.writeOutput(capitalizedSentence);
+                }
             } catch (IOException e) {
                 System.out.print("Error");
             }
@@ -56,16 +61,17 @@ class Client extends Thread {
      * @return              the string the user has input
      * @throws IOException  an exception if error reading has occurred.
      */
-    private String readInput() throws IOException {
+    private String readCommand() throws IOException {
         StringBuilder s = new StringBuilder();
-        char c;
+        int c;
 
         do {
-            c = (char) this.input.read();
-            s.append(Character.toString(c));
-        } while (c != '\0');
+            c = this.input.read();
+            s.append(String.valueOf((char)c));
+        } while (c > 0);
 
-        return s.toString();
+        // Remove the null terminating character from the string.
+        return s.toString().substring(0, s.toString().length() - 1);
     }
 
     private void writeOutput(String message) throws IOException {

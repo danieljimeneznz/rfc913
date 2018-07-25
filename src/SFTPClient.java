@@ -19,7 +19,7 @@ class SFTPClient {
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         sentence = inFromUser.readLine();
-        outToServer.writeBytes(sentence + '\n');
+        outToServer.writeBytes(sentence + '\0');
         modifiedSentence = inFromServer.readLine();
         System.out.println("FROM SERVER: " + modifiedSentence);
 
