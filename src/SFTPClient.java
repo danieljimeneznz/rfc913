@@ -10,19 +10,29 @@ import java.net.*;
 class SFTPClient {
 
     public static void main(String argv[]) throws Exception {
-        String sentence;
-        String modifiedSentence;
+        BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
+        Socket socket = new Socket("localhost", 1155);
+        DataOutputStream serverOut = new DataOutputStream(socket.getOutputStream());
+        BufferedReader serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-        Socket clientSocket = new Socket("localhost", 1155);
-        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//        outToServer.writeBytes(sentence + '\0');
+        while (true) {
+            System.out.println(serverIn.readLine());
 
-        sentence = inFromUser.readLine();
-        outToServer.writeBytes(sentence + '\0');
-        modifiedSentence = inFromServer.readLine();
-        System.out.println("FROM SERVER: " + modifiedSentence);
+            // Check to see if the server is still connected.
+            if (serverIn.read() == -1) {
+                SFTPClient.closeConnection(userIn, socket, serverOut, serverIn);
+                return;
+            }
+        }
+    }
 
-        clientSocket.close();
+    private static void closeConnection(BufferedReader userIn, Socket socket, DataOutputStream serverOut, BufferedReader serverIn) throws IOException {
+        userIn.close();
+        serverOut.close();
+        serverIn.close();
+        System.out.println("Server disconnected on socket: " + String.valueOf(socket.getPort()));
+        System.out.println("Closed connection");
+        socket.close();
     }
 } 

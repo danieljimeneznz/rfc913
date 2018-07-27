@@ -28,35 +28,66 @@ class SFTPServer {
 class Client extends Thread {
     private String user;
     private Boolean bIsAuthenticated;
+    private Socket socket;
     private BufferedReader input;
     private DataOutputStream output;
 
     Client(Socket socket) throws IOException {
         System.out.println("Client connected on socket: " + String.valueOf(socket.getPort()));
-        input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        output = new DataOutputStream(socket.getOutputStream());
-    }
+        this.socket = socket;
+        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.output = new DataOutputStream(socket.getOutputStream());
 
-    public void run() {
-        // Continue to wait for commands until the NULL terminating character has been sent.
-        //noinspection InfiniteLoopStatement
-        while(true) {
+        // Send first reply.
+        try {
+            this.writeOutput("+" + InetAddress.getLocalHost().getHostName() + " SFTP Service");
+        } catch (IOException e) {
             try {
-                String command = this.readCommand();
-
-                // Check to see if we have read in a command.
-                if (command.length() > 0) {
-                    String capitalizedSentence = command.toUpperCase() + '\n';
-                    this.writeOutput(capitalizedSentence);
-                }
-            } catch (IOException e) {
-                System.out.print("Error");
+                this.writeOutput("-SFTP error, unable to obtain hostname");
+                this.closeConnection();
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
         }
     }
 
+    public void run() {
+        String command;
+
+        // Continue to wait for commands until the NULL terminating character has been sent.
+        //noinspection InfiniteLoopStatement
+        while(true) {
+            try {
+                command = this.readCommand();
+
+                // Check to see if we have read in a command.
+                if (command.length() > 0) {
+                    // Deal with the current command being sent.
+
+                    this.writeOutput("Hello");
+                }
+
+                // Check to see if the client is still connected.
+                if (this.input.read() == -1) {
+                    this.closeConnection();
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void closeConnection() throws IOException {
+        this.input.close();
+        this.output.close();
+        System.out.println("Client disconnected on socket: " + String.valueOf(this.socket.getPort()));
+        this.socket.close();
+    }
+
     /**
      * Reads the input from the client until the null terminating character is sent.
+     * This method also makes the thread wait for input as long as the client is connected.
      *
      * @return              the string the user has input
      * @throws IOException  an exception if error reading has occurred.
@@ -75,12 +106,6 @@ class Client extends Thread {
     }
 
     private void writeOutput(String message) throws IOException {
-        output.writeBytes(message);
+        this.output.writeBytes(message + "\n");
     }
 }
-
-//class SFTPException extends Throwable {
-//    private String code;
-//    private String message;
-//}
-
