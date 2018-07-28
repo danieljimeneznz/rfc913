@@ -14,6 +14,7 @@ class Client extends Thread {
         this.socket = socket;
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.output = new DataOutputStream(socket.getOutputStream());
+        this.user = new User();
 
         // Send first reply.
         try {
@@ -117,18 +118,21 @@ class Client extends Thread {
         this.output.writeBytes(message + '\0');
     }
 
+    @SuppressWarnings("ConstantConditions")
     boolean isAuthenticated() {
-        try {
-            if (this.bIsAuthenticated) {
-                return true;
-            } else {
-                // Inform the client that they are not authenticated.
-                this.writeOutput("Hello");
+        if (this.bIsAuthenticated) {
+            return true;
+        } else {
+            // Test to see if the user is authenticated by checking each of the user values specified against those
+            // in the users file.
+            Users users = Server.getUsers();
+            User u = users.getUser(this.user.id, this.user.acct, this.user.pass);
+
+            if (u == null) {
                 return false;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            this.bIsAuthenticated = true;
+            return true;
         }
     }
 }

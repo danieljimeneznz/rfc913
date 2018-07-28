@@ -18,12 +18,25 @@ class Users {
         }
         return null;
     }
+
+    User getUser(String id, String acct, String pass) {
+        if (id == null || acct == null || pass == null) {
+            return null;
+        }
+
+        for (User user: users) {
+            if (user.id.equals(id) && user.acct.equals(acct) && user.decryptPassword().equals(pass)) {
+                return user;
+            }
+        }
+        return null;
+    }
 }
 
 class User {
     String id;
     String acct;
-    private String pass;
+    String pass;
 
     String decryptPassword() {
         return new String(Base64.getDecoder().decode(this.pass));

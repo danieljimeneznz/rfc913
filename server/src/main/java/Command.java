@@ -33,15 +33,16 @@ class Command {
                 this.client.writeOutput("-Invalid user-id, try again");
                 return;
             }
-            this.client.user = u;
 
-            if (u.acct.equals("")) {
+            if (u.acct.equals("") || this.client.isAuthenticated()) {
                 this.client.bIsAuthenticated = true;
+                this.client.user = u;
                 System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!" + u.id + " logged in");
                 return;
             }
 
+            this.client.user.id = u.id;
             System.out.println(u.id + ": logged in to server");
             this.client.writeOutput("+User-id valid, send account and password");
         } catch (IOException e) {
