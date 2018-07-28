@@ -4,6 +4,12 @@
   All Rights Reserved.
  */
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.*;
 
 class Server {
@@ -20,6 +26,19 @@ class Server {
             Socket s = socket.accept();
             Client client = new Client(s);
             client.start();
+        }
+    }
+
+    static Users getUsers() {
+        try {
+            Reader reader = new InputStreamReader(Server.class.getResourceAsStream("/users.json"));
+            Gson gson = new GsonBuilder().create();
+            Users u = gson.fromJson(reader, Users.class);
+            reader.close();
+            return u;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

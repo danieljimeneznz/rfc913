@@ -2,8 +2,8 @@ import java.io.*;
 import java.net.*;
 
 class Client extends Thread {
-    String user;
-    private boolean bIsAuthenticated;
+    User user;
+    boolean bIsAuthenticated;
     private Socket socket;
     private BufferedReader input;
     private DataOutputStream output;
@@ -92,7 +92,6 @@ class Client extends Thread {
         this.socket.close();
         this.input.close();
         this.output.close();
-
     }
 
     /**

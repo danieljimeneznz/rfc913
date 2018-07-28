@@ -1,5 +1,5 @@
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.InetAddress;
 
 class Command {
     private Client client;
@@ -15,11 +15,36 @@ class Command {
         }
     }
 
-//    void readUserFile() {
-//        JSONObject obj = new JSONObject();
-//    }
-
+    @SuppressWarnings("ConstantConditions")
     void user() {
+        try {
+            // First check that the arg was given.
+            if (args.length > 1) {
+                this.client.writeOutput("-Invalid user-id, try again");
+                return;
+            }
+
+            // Try to find the current user based on id.
+            Users users = Server.getUsers();
+            User u = users.getUser(args[0]);
+            if (u == null) {
+                // User does not exist.
+                this.client.writeOutput("-Invalid user-id, try again");
+                return;
+            }
+            System.out.println(u.id + ": connected to server");
+            this.client.user = u;
+
+            if (u.acct.equals("")) {
+                this.client.bIsAuthenticated = true;
+                this.client.writeOutput("!" + u.id + " logged in");
+                return;
+            }
+
+            this.client.writeOutput("+User-id valid, send account and password");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void acct() {

@@ -21,6 +21,8 @@ class Client {
                 String s = Client.readInput(serverIn, c);
                 if (s.length() > 0) {
                     System.out.println(s);
+                    serverOut.writeBytes("USER 1\0");
+                    serverOut.writeBytes("USER 6\0");
                     serverOut.writeBytes("DONE\0");
                 }
 

@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "acct": "test",
+      "pass": "dGVzdA=="
+    },
+    {
+      "id": "2",
+      "acct": "admin",
+      "pass": "YWRtaW4="
+
+    },
+    {
+      "id": "3",
+      "acct": "",
+      "pass": ""
+    }
+  ]
+}
