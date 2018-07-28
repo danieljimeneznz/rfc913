@@ -29,18 +29,20 @@ class Command {
             User u = users.getUser(args[0]);
             if (u == null) {
                 // User does not exist.
+                System.out.println(args[0] + ": invalid user-id attempted to log in to server");
                 this.client.writeOutput("-Invalid user-id, try again");
                 return;
             }
-            System.out.println(u.id + ": connected to server");
             this.client.user = u;
 
             if (u.acct.equals("")) {
                 this.client.bIsAuthenticated = true;
+                System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!" + u.id + " logged in");
                 return;
             }
 
+            System.out.println(u.id + ": logged in to server");
             this.client.writeOutput("+User-id valid, send account and password");
         } catch (IOException e) {
             e.printStackTrace();
