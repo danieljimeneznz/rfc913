@@ -15,18 +15,46 @@ class SFTPClient {
         DataOutputStream serverOut = new DataOutputStream(socket.getOutputStream());
         BufferedReader serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-//        outToServer.writeBytes(sentence + '\0');
         while (true) {
-            System.out.println(serverIn.readLine());
+            try {
+                int c = serverIn.read();
+                String s = SFTPClient.readInput(serverIn, c);
+                if (s.length() > 0) {
+                    System.out.println(s);
+                    serverOut.writeBytes("DONE\0");
+                }
 
-            // Check to see if the server is still connected.
-            if (serverIn.read() == -1) {
+                // Check to see if the server is still connected.
+                if (c == -1) {
+                    SFTPClient.closeConnection(userIn, socket, serverOut, serverIn);
+                    return;
+                }
+            } catch (SocketException e) {
                 SFTPClient.closeConnection(userIn, socket, serverOut, serverIn);
                 return;
             }
         }
     }
 
+    /**
+     * Reads the input from the client until the null terminating character is sent.
+     * This method also makes the thread wait for input as long as the server is connected.
+     *
+     * @return              the string the user has input
+     * @throws IOException  an exception if error reading has occurred.
+     */
+    private static String readInput(BufferedReader input, int i) throws IOException {
+        StringBuilder s = new StringBuilder();
+        int c = i;
+
+        while (c > 0) {
+            s.append(String.valueOf((char)c));
+            c = input.read();
+        }
+
+        // Remove the null terminating character from the string.
+        return s.toString();
+    }
     private static void closeConnection(BufferedReader userIn, Socket socket, DataOutputStream serverOut, BufferedReader serverIn) throws IOException {
         userIn.close();
         serverOut.close();
