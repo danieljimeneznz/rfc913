@@ -1,0 +1,13 @@
+//
+{
+  "user-id": {
+    "1": {
+      "acct": "test",
+      "pass": "test"
+    },
+    "2": {
+      "acct": "admin",
+      "pass": "admin"
+    }
+  }
+}

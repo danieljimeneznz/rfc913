@@ -1,13 +1,13 @@
-/**
- * Code is taken from Computer Networking: A Top-Down Approach Featuring
- * the Internet, second edition, copyright 1996-2002 J.F Kurose and K.W. Ross,
- * All Rights Reserved.
- **/
+/*
+  Code is taken from Computer Networking: A Top-Down Approach Featuring
+  the Internet, second edition, copyright 1996-2002 J.F Kurose and K.W. Ross,
+  All Rights Reserved.
+ */
 
 import java.io.*;
 import java.net.*;
 
-class SFTPClient {
+class Client {
 
     public static void main(String argv[]) throws Exception {
         BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
@@ -18,7 +18,7 @@ class SFTPClient {
         while (true) {
             try {
                 int c = serverIn.read();
-                String s = SFTPClient.readInput(serverIn, c);
+                String s = Client.readInput(serverIn, c);
                 if (s.length() > 0) {
                     System.out.println(s);
                     serverOut.writeBytes("DONE\0");
@@ -26,11 +26,11 @@ class SFTPClient {
 
                 // Check to see if the server is still connected.
                 if (c == -1) {
-                    SFTPClient.closeConnection(userIn, socket, serverOut, serverIn);
+                    Client.closeConnection(userIn, socket, serverOut, serverIn);
                     return;
                 }
             } catch (SocketException e) {
-                SFTPClient.closeConnection(userIn, socket, serverOut, serverIn);
+                Client.closeConnection(userIn, socket, serverOut, serverIn);
                 return;
             }
         }
