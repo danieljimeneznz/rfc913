@@ -10,13 +10,36 @@ class Users {
         this.users = users;
     }
 
-    User getUser(String id) {
+    User getUserByID(String id) {
         for (User user : users) {
             if (user.id.equals(id)) {
                 return user;
             }
         }
         return null;
+    }
+
+    User getUserByAcct(String acct) {
+        for (User user : users) {
+            if (user.acct.equals(acct)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks to see if the password is a valid users password.
+     * @param pass  the password to check.
+     * @return      whether the password matches any in the users file.
+     */
+    boolean checkPass(String pass) {
+        for (User user : users) {
+            if (user.decryptPassword().equals(pass)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     User getUser(String id, String acct, String pass) {

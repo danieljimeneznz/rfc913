@@ -7,13 +7,14 @@ class Client extends Thread {
     private Socket socket;
     private BufferedReader input;
     private DataOutputStream output;
-    String currentDir;
+    private String currentDir;
 
     Client(Socket socket) throws IOException {
         System.out.println("Client connected on socket: " + String.valueOf(socket.getPort()));
         this.socket = socket;
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.output = new DataOutputStream(socket.getOutputStream());
+        this.currentDir = System.getProperty("user.dir" + "/mnt");
         this.user = new User();
 
         // Send first reply.
