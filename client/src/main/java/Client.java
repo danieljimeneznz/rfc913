@@ -24,6 +24,7 @@ class Client {
 //                    serverOut.writeBytes("USER 1\0");
 //                    serverOut.writeBytes("USER 3\0");
 //                    serverOut.writeBytes("USER 6\0");
+                    serverOut.writeBytes("TYPE a\0");
                     serverOut.writeBytes("PASS test\0");
                     serverOut.writeBytes("ACCT admin\0");
                     serverOut.writeBytes("USER 1\0");

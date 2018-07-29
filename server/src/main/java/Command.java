@@ -18,9 +18,8 @@ class Command {
     @SuppressWarnings("ConstantConditions")
     void user() {
         try {
-            // First check that the arg was given.
-            if (args.length > 1) {
-                this.client.writeOutput("-Invalid user-id, try again");
+            // First check that an arg was given.
+            if (checkArguments(1)) {
                 return;
             }
 
@@ -35,7 +34,7 @@ class Command {
             }
 
             this.client.user.id = u.id;
-            if (u.acct.equals("") || this.client.isAuthenticated()) {
+            if (u.pass.equals("") || this.client.checkAuthentication()) {
                 this.client.user = u;
                 System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!" + u.id + " logged in");
@@ -43,7 +42,11 @@ class Command {
             }
 
             System.out.println(u.id + ": sent user id to server");
-            this.client.writeOutput("+User-id valid, send account and password");
+            if (this.client.user.acct != null) {
+                this.client.writeOutput("+User-id valid, send password");
+            } else {
+                this.client.writeOutput("+User-id valid, send account and password");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,9 +55,8 @@ class Command {
     @SuppressWarnings("ConstantConditions")
     void acct() {
         try {
-            // First check that the arg was given.
-            if (args.length > 1) {
-                this.client.writeOutput("-Invalid account, try again");
+            // First check that an arg was given.
+            if (checkArguments(1)) {
                 return;
             }
 
@@ -68,7 +70,7 @@ class Command {
             }
 
             this.client.user.acct = u.acct;
-            if (this.client.isAuthenticated()) {
+            if (this.client.checkAuthentication()) {
                 this.client.user = u;
                 System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!Account valid, logged-in");
@@ -85,14 +87,13 @@ class Command {
     @SuppressWarnings("ConstantConditions")
     void pass() {
         try {
-            // First check that the arg was given.
-            if (args.length > 1) {
-                this.client.writeOutput("-Wrong password, try again");
+            // First check that an arg was given.
+            if (checkArguments(1)) {
                 return;
             }
 
             this.client.user.pass = args[0];
-            if (this.client.isAuthenticated()) {
+            if (this.client.checkAuthentication()) {
                 System.out.println(this.client.user.id + ": authenticated with server");
                 this.client.writeOutput("!Logged in");
                 return;
@@ -113,8 +114,32 @@ class Command {
     }
 
     void type() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                switch (args[0]) {
+                    case "A":
+                        this.client.transmissionType = "A";
+                        this.client.writeOutput("+Using Ascii mode");
+                        break;
+                    case "B":
+                        this.client.transmissionType = "B";
+                        this.client.writeOutput("+Using Binary mode");
+                        break;
+                    case "C":
+                        this.client.transmissionType = "C";
+                        this.client.writeOutput("+Using Continuous mode");
+                        break;
+                    default:
+                        this.client.writeOutput("-Type not valid");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -156,6 +181,15 @@ class Command {
         if (client.isAuthenticated()) {
             System.out.println("hello");
         }
+    }
+
+    private boolean checkArguments(int amount) throws IOException {
+        // First check that the arg was given.
+        if (args.length != amount) {
+            this.client.writeOutput("-Invalid amount of arguments given");
+            return true;
+        }
+        return false;
     }
 }
 

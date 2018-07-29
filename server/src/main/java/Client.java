@@ -3,11 +3,13 @@ import java.net.*;
 
 class Client extends Thread {
     User user;
-    boolean bIsAuthenticated;
+    private boolean bIsAuthenticated;
     private Socket socket;
     private BufferedReader input;
     private DataOutputStream output;
     private String currentDir;
+    String transmissionType;
+
 
     Client(Socket socket) throws IOException {
         System.out.println("Client connected on socket: " + String.valueOf(socket.getPort()));
@@ -16,6 +18,7 @@ class Client extends Thread {
         this.output = new DataOutputStream(socket.getOutputStream());
         this.currentDir = System.getProperty("user.dir" + "/mnt");
         this.user = new User();
+        this.transmissionType = "B";
 
         // Send first reply.
         try {
@@ -121,6 +124,21 @@ class Client extends Thread {
 
     @SuppressWarnings("ConstantConditions")
     boolean isAuthenticated() {
+        try {
+            if (this.bIsAuthenticated) {
+                return true;
+            } else {
+                this.writeOutput("-User not authenticated");
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    boolean checkAuthentication() {
         if (this.bIsAuthenticated) {
             return true;
         } else {
