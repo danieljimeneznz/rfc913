@@ -69,6 +69,9 @@ class Client extends Thread {
                         case "CDIR":
                             command.cdir();
                             break;
+                        case "KILL":
+                            command.kill();
+                            break;
                         case "NAME":
                             command.name();
                             break;

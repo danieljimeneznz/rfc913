@@ -257,6 +257,21 @@ class Command {
         }
     }
 
+    void kill() {
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                System.out.println("hellwfsafao");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     void name() {
         try {
             // First check that an arg was given.
