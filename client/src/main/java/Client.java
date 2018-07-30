@@ -29,6 +29,7 @@ class Client {
                     serverOut.writeBytes("ACCT admin\0");
                     serverOut.writeBytes("USER 1\0");
                     serverOut.writeBytes("ACCT test\0");
+                    serverOut.writeBytes("LIST F\0");
                     serverOut.writeBytes("DONE\0");
                 }
 

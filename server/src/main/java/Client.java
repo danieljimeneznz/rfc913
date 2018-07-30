@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Properties;
 
 class Client extends Thread {
     User user;
@@ -7,7 +8,8 @@ class Client extends Thread {
     private Socket socket;
     private BufferedReader input;
     private DataOutputStream output;
-    private String currentDir;
+    String mountDir;
+    String currentDir;
     String transmissionType;
 
 
@@ -16,7 +18,8 @@ class Client extends Thread {
         this.socket = socket;
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.output = new DataOutputStream(socket.getOutputStream());
-        this.currentDir = System.getProperty("user.dir" + "/mnt");
+        this.mountDir = System.getProperty("user.dir") + "/mnt";
+        this.currentDir = this.mountDir;
         this.user = new User();
         this.transmissionType = "B";
 

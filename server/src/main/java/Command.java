@@ -1,5 +1,10 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Objects;
+
+import org.apache.commons.io.comparator.NameFileComparator;
 
 class Command {
     private Client client;
@@ -144,8 +149,53 @@ class Command {
     }
 
     void list() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+            if (client.isAuthenticated()) {
+                // Get the directory from the argument or set to the current dir if not specified.
+                String directory = args.length == 2 ? args[1] : null;
+                if (directory == null) {
+                    directory = this.client.currentDir;
+                } else {
+                    // Make sure directory is within the mount dir if it is absolute. Otherwise append it to the currentdir.
+                    if (directory.charAt(0) == '/') {
+                        directory = this.client.mountDir + directory;
+                    } else {
+                        directory = this.client.currentDir + "/" + directory;
+                    }
+                }
+
+                // We now have the correct directory path to perform the LIST command on.
+                switch (args[0]) {
+                    case "F":
+                        File[] files = new File(directory).listFiles();
+                        if (files == null) {
+                            return;
+                        }
+
+                        Arrays.sort(files, NameFileComparator.NAME_COMPARATOR);
+                        StringBuilder response = new StringBuilder();
+                        for (int i = 0; i < files.length; i++) {
+                            if (i == files.length - 1) {
+                                response.append(files[i].getName());
+                            } else {
+                                response.append(files[i].getName()).append("\n");
+                            }
+                        }
+                        this.client.writeOutput(response.toString());
+                        break;
+                    case "V":
+                        // TODO: WRITE THIS.
+                        break;
+                    default:
+                        this.client.writeOutput("-Directory listing format not valid");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -185,7 +235,7 @@ class Command {
 
     private boolean checkArguments(int amount) throws IOException {
         // First check that the arg was given.
-        if (args.length != amount) {
+        if (args.length < amount) {
             this.client.writeOutput("-Invalid amount of arguments given");
             return true;
         }
