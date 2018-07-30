@@ -1,6 +1,12 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileOwnerAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -168,30 +174,49 @@ class Command {
                     }
                 }
 
+                if (!args[0].equals("F") && !args[0].equals("V")) {
+                    this.client.writeOutput("-Directory listing format not valid");
+                    return;
+                }
+
+                File folder = new File(directory);
+                File[] files = folder.listFiles();
+                if (!folder.exists() || !folder.isDirectory()) {
+                    this.client.writeOutput("-Directory does not exist");
+                    return;
+                }
+
+                this.client.writeOutput("+" + directory);
+                if (files == null) {
+                    return;
+                }
+
+                Arrays.sort(files, NameFileComparator.NAME_COMPARATOR);
+                StringBuilder response = new StringBuilder();
                 // We now have the correct directory path to perform the LIST command on.
                 switch (args[0]) {
                     case "F":
-                        File[] files = new File(directory).listFiles();
-                        if (files == null) {
-                            return;
-                        }
-
-                        Arrays.sort(files, NameFileComparator.NAME_COMPARATOR);
-                        StringBuilder response = new StringBuilder();
                         for (int i = 0; i < files.length; i++) {
-                            if (i == files.length - 1) {
-                                response.append(files[i].getName());
-                            } else {
-                                response.append(files[i].getName()).append("\n");
+                            response.append(files[i].getName());
+                            if (i != files.length - 1) {
+                                response.append("\n");
                             }
                         }
                         this.client.writeOutput(response.toString());
                         break;
                     case "V":
-                        // TODO: WRITE THIS.
+                        // Verbose output = filename    size    modified time   owner
+                        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                        for (int i = 0; i < files.length; i++) {
+                            Path path = Paths.get(files[i].getAbsolutePath());
+                            FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+                            response.append(files[i].getName()).append("\t").append(files[i].length()).append("\t").append(sdf.format(files[i].lastModified())).append("\t").append(ownerAttributeView.getOwner());
+                            if (i != files.length - 1) {
+                                response.append("\n");
+                            }
+                        }
+                        this.client.writeOutput(response.toString());
                         break;
-                    default:
-                        this.client.writeOutput("-Directory listing format not valid");
                 }
             }
         } catch (IOException e) {

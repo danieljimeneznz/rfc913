@@ -30,6 +30,9 @@ class Client {
                     serverOut.writeBytes("USER 1\0");
                     serverOut.writeBytes("ACCT test\0");
                     serverOut.writeBytes("LIST F\0");
+                    serverOut.writeBytes("LIST F hello\0");
+                    serverOut.writeBytes("LIST F empty\0");
+                    serverOut.writeBytes("LIST V\0");
                     serverOut.writeBytes("DONE\0");
                 }
 
