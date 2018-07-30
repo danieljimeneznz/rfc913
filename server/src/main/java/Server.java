@@ -13,12 +13,23 @@ import java.io.Reader;
 import java.net.*;
 
 class Server {
+    private static Users users;
+
     public static void main(String argv[]) throws Exception {
         // Binding to port 1155 which is technically not correct for SFTP but the application needs root privileges
         // to bind to port 115.
         int port = 1155;
         ServerSocket socket = new ServerSocket(port);
         System.out.println("Server listening on port: " + String.valueOf(port));
+
+        try {
+            Reader reader = new InputStreamReader(Server.class.getResourceAsStream("/users.json"));
+            Gson gson = new GsonBuilder().create();
+            users = gson.fromJson(reader, Users.class);
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Listen for incoming connections to the server.
         //noinspection InfiniteLoopStatement
@@ -30,15 +41,6 @@ class Server {
     }
 
     static Users getUsers() {
-        try {
-            Reader reader = new InputStreamReader(Server.class.getResourceAsStream("/users.json"));
-            Gson gson = new GsonBuilder().create();
-            Users u = gson.fromJson(reader, Users.class);
-            reader.close();
-            return u;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return Server.users;
     }
 }

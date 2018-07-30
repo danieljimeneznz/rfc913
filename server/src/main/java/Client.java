@@ -145,19 +145,16 @@ class Client extends Thread {
 
     @SuppressWarnings("ConstantConditions")
     boolean checkAuthentication() {
-        if (this.bIsAuthenticated) {
-            return true;
-        } else {
-            // Test to see if the user is authenticated by checking each of the user values specified against those
-            // in the users file.
-            Users users = Server.getUsers();
-            User u = users.getUser(this.user.id, this.user.acct, this.user.pass);
+        // Test to see if the user is authenticated by checking each of the user values specified against those
+        // in the users file.
+        Users users = Server.getUsers();
+        User u = users.getUser(this.user.id, this.user.acct, this.user.pass);
 
-            if (u == null) {
-                return false;
-            }
-            this.bIsAuthenticated = true;
-            return true;
+        if (u == null) {
+            this.bIsAuthenticated = false;
+            return false;
         }
+        this.bIsAuthenticated = true;
+        return true;
     }
 }

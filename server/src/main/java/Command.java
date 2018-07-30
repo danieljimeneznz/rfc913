@@ -1,3 +1,5 @@
+import org.apache.commons.io.comparator.NameFileComparator;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -5,12 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileOwnerAttributeView;
-import java.nio.file.attribute.PosixFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Objects;
-
-import org.apache.commons.io.comparator.NameFileComparator;
 
 class Command {
     private Client client;
@@ -244,7 +242,7 @@ class Command {
             File folder = new File(directory);
             if (folder.exists() && folder.isDirectory()) {
                 if (!client.isAuthenticated()) {
-                    this.client.writeOutput("+directory ok, send account/password");
+                    this.client.writeOutput("+Directory ok, send account/password");
                 } else {
                     this.client.currentDir = directory;
                     this.client.writeOutput("!Changed working dir to " + args[0]);
