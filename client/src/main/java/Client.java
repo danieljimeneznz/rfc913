@@ -33,6 +33,10 @@ class Client {
                     serverOut.writeBytes("LIST F hello\0");
                     serverOut.writeBytes("LIST F empty\0");
                     serverOut.writeBytes("LIST V\0");
+                    serverOut.writeBytes("CDIR test\0");
+                    serverOut.writeBytes("CDIR empty\0");
+                    serverOut.writeBytes("PASS dafafa\0");
+                    serverOut.writeBytes("CDIR /\0");
                     serverOut.writeBytes("DONE\0");
                 }
 

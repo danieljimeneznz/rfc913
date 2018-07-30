@@ -225,15 +225,50 @@ class Command {
     }
 
     void cdir() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
 
+            // Get the directory from the argument or set to the current dir if not specified.
+            String directory = args[0];
+
+            // Make sure directory is within the mount dir if it is absolute. Otherwise append it to the currentdir.
+            if (directory.charAt(0) == '/') {
+                directory = this.client.mountDir + directory;
+            } else {
+                directory = this.client.currentDir + "/" + directory;
+            }
+
+            File folder = new File(directory);
+            if (folder.exists() && folder.isDirectory()) {
+                if (!client.isAuthenticated()) {
+                    this.client.writeOutput("+directory ok, send account/password");
+                } else {
+                    this.client.currentDir = directory;
+                    this.client.writeOutput("!Changed working dir to " + args[0]);
+                }
+            } else {
+                this.client.writeOutput("-Can't connect to directory because: it does not exist");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     void name() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                System.out.println("hellwo");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -247,14 +282,32 @@ class Command {
     }
 
     void retr() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                System.out.println("helelo");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     void stor() {
-        if (client.isAuthenticated()) {
-            System.out.println("hello");
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                System.out.println("hsello");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
