@@ -6,7 +6,7 @@ class Client extends Thread {
     User user;
     private boolean bIsAuthenticated;
     private Socket socket;
-    private BufferedReader input;
+    BufferedReader input;
     private DataOutputStream output;
     String mountDir;
     String currentDir;
@@ -112,7 +112,7 @@ class Client extends Thread {
      * @return              the string the user has input
      * @throws IOException  an exception if error reading has occurred.
      */
-    private String readCommand(int i) throws IOException {
+    String readCommand(int i) throws IOException {
         StringBuilder s = new StringBuilder();
         int c = i;
 

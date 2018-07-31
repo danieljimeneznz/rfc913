@@ -37,6 +37,14 @@ class Client {
                     serverOut.writeBytes("CDIR empty\0");
                     serverOut.writeBytes("PASS dafafa\0");
                     serverOut.writeBytes("CDIR /\0");
+                    serverOut.writeBytes("PASS test\0");
+                    serverOut.writeBytes("CDIR /\0");
+                    serverOut.writeBytes("KILL kill.txt\0");
+                    serverOut.writeBytes("NAME a.txt\0");
+                    serverOut.writeBytes("TOBE c.txt\0");
+                    serverOut.writeBytes("NAME c.txt\0");
+                    serverOut.writeBytes("TOBE a.txt\0");
+                    serverOut.writeBytes("NAME abc.txt\0");
                     serverOut.writeBytes("DONE\0");
                 }
 

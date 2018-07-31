@@ -248,7 +248,7 @@ class Command {
                     this.client.writeOutput("!Changed working dir to " + args[0]);
                 }
             } else {
-                this.client.writeOutput("-Can't connect to directory because: it does not exist");
+                this.client.writeOutput("-Can't connect to directory because it does not exist");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -263,8 +263,22 @@ class Command {
             }
 
             if (client.isAuthenticated()) {
-                System.out.println("hellwfsafao");
+                File file = new File(this.client.currentDir + args[0]);
+
+                if (file.exists())
+                {
+                    boolean result = file.delete();
+                    if (result) {
+                        this.client.writeOutput("+" + args[0] + " deleted");
+                    } else {
+                        this.client.writeOutput("-Failed to delete file or folder");
+                    }
+                    return;
+                }
+                this.client.writeOutput("-Not deleted because file or folder does not exist");
+                return;
             }
+            this.client.writeOutput("-Not deleted because user not authenticated");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -278,7 +292,32 @@ class Command {
             }
 
             if (client.isAuthenticated()) {
-                System.out.println("hellwo");
+                File file = new File(this.client.currentDir + args[0]);
+                if (!file.exists()) {
+                    this.client.writeOutput("-Can't find " + args[0]);
+                }
+
+                // TODO: DEFINITELY STORE PREVIOUS COMMAND AND THEN DO THIS FROM CLIENT CLASS IN SEPARATE COMMAND METHOD
+                // TODO: THAT ASKS WHAT THE PREVIOUS COMMAND WAS.
+//                int c = this.client.input.read();
+//                String s = this.client.readCommand(c);
+//                Command tobe = new Command(this.client, s);
+//
+//                if (!tobe.cmd.equals("TOBE")) {
+//                    this.client.writeOutput("-File wasn't renamed because client did not send TOBE command");
+//                    return;
+//                }
+//
+//                // Check tobe has at least 1 argument.
+//                if(tobe.checkArguments(1)) {
+//                    // Rename file.
+//                    boolean result = file.renameTo(new File(this.client.currentDir + tobe.args[0]));
+//                    if (result) {
+//                        this.client.writeOutput("+" + args[0] + " renamed to " + tobe.args[0]);
+//                    } else {
+//                        this.client.writeOutput("-Failed to rename file");
+//                    }
+//                }
             }
         } catch (IOException e) {
             e.printStackTrace();
