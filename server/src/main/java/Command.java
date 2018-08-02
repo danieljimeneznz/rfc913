@@ -296,28 +296,37 @@ class Command {
                 if (!file.exists()) {
                     this.client.writeOutput("-Can't find " + args[0]);
                 }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-                // TODO: DEFINITELY STORE PREVIOUS COMMAND AND THEN DO THIS FROM CLIENT CLASS IN SEPARATE COMMAND METHOD
-                // TODO: THAT ASKS WHAT THE PREVIOUS COMMAND WAS.
-//                int c = this.client.input.read();
-//                String s = this.client.readCommand(c);
-//                Command tobe = new Command(this.client, s);
-//
-//                if (!tobe.cmd.equals("TOBE")) {
-//                    this.client.writeOutput("-File wasn't renamed because client did not send TOBE command");
-//                    return;
-//                }
-//
-//                // Check tobe has at least 1 argument.
-//                if(tobe.checkArguments(1)) {
-//                    // Rename file.
-//                    boolean result = file.renameTo(new File(this.client.currentDir + tobe.args[0]));
-//                    if (result) {
-//                        this.client.writeOutput("+" + args[0] + " renamed to " + tobe.args[0]);
-//                    } else {
-//                        this.client.writeOutput("-Failed to rename file");
-//                    }
-//                }
+    void tobe() {
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                if (!this.client.previousCommand.cmd.equals("NAME")) {
+                    this.client.writeOutput("-File wasn't renamed because client did not send NAME command before");
+                    return;
+                }
+
+                File file = new File(this.client.currentDir + this.client.previousCommand.args[0]);
+                if (!file.exists()) {
+                    this.client.writeOutput("-Can't find " + this.client.previousCommand.args[0]);
+                }
+
+                // Rename file.
+                boolean result = file.renameTo(new File(this.client.currentDir + args[0]));
+                if (result) {
+                    this.client.writeOutput("+" + this.client.previousCommand.args[0] + " renamed to " + args[0]);
+                } else {
+                    this.client.writeOutput("-Failed to rename file");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

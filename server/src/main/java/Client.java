@@ -6,11 +6,12 @@ class Client extends Thread {
     User user;
     private boolean bIsAuthenticated;
     private Socket socket;
-    BufferedReader input;
+    private BufferedReader input;
     private DataOutputStream output;
     String mountDir;
     String currentDir;
     String transmissionType;
+    Command previousCommand;
 
 
     Client(Socket socket) throws IOException {
@@ -22,6 +23,7 @@ class Client extends Thread {
         this.currentDir = this.mountDir;
         this.user = new User();
         this.transmissionType = "B";
+        this.previousCommand = null;
 
         // Send first reply.
         try {
@@ -39,10 +41,10 @@ class Client extends Thread {
     public void run() {
         Command command;
 
-        // Continue to wait for commands until the NULL terminating character has been sent.
-        //noinspection InfiniteLoopStatement
-        while(true) {
-            try {
+        try {
+            // Continue to wait for commands until the NULL terminating character has been sent.
+            //noinspection InfiniteLoopStatement
+            while(true) {
                 int c = this.input.read();
                 String s = this.readCommand(c);
                 // Check to see if we have read in a command.
@@ -75,6 +77,9 @@ class Client extends Thread {
                         case "NAME":
                             command.name();
                             break;
+                        case "TOBE":
+                            command.tobe();
+                            break;
                         case "DONE":
                             command.done();
                             return;
@@ -85,16 +90,17 @@ class Client extends Thread {
                             command.stor();
                             break;
                     }
+                    this.previousCommand = command;
                 }
-
                 // Check to see if the client is still connected.
                 if (c == -1) {
                     this.closeConnection();
+                    this.interrupt();
                     return;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -112,7 +118,7 @@ class Client extends Thread {
      * @return              the string the user has input
      * @throws IOException  an exception if error reading has occurred.
      */
-    String readCommand(int i) throws IOException {
+    private String readCommand(int i) throws IOException {
         StringBuilder s = new StringBuilder();
         int c = i;
 

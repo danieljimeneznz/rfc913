@@ -21,6 +21,9 @@ class Client {
                 String s = Client.readInput(serverIn, c);
                 if (s.length() > 0) {
                     System.out.println(s);
+                    // TODO: WILL NEED COMMANDS TO BE EXECUTED AFTER RETRIEVING THE RESPONSE FROM THE SERVER. I.E.
+                    // TODO: SEND COMMAND, WAIT RESPONSE, DO AGAIN. (ON FIRST RUN RECEIVE RESPONSE THEN SEND COMMAND).
+
 //                    serverOut.writeBytes("USER 1\0");
 //                    serverOut.writeBytes("USER 3\0");
 //                    serverOut.writeBytes("USER 6\0");
@@ -42,8 +45,8 @@ class Client {
                     serverOut.writeBytes("KILL kill.txt\0");
                     serverOut.writeBytes("NAME a.txt\0");
                     serverOut.writeBytes("TOBE c.txt\0");
-                    serverOut.writeBytes("NAME c.txt\0");
-                    serverOut.writeBytes("TOBE a.txt\0");
+//                    serverOut.writeBytes("NAME c.txt\0");
+//                    serverOut.writeBytes("TOBE a.txt\0");
                     serverOut.writeBytes("NAME abc.txt\0");
                     serverOut.writeBytes("DONE\0");
                 }
