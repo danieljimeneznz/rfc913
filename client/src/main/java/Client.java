@@ -56,8 +56,11 @@ class Client {
 //          client.sendCommand("NAME c.txt");
 //          client.sendCommand("TOBE a.txt");
             client.sendCommand("NAME abc.txt");
+            client.sendCommand("LIST V");
             client.sendCommand("RETR b.txt");
             client.sendCommand("SEND");
+            client.sendCommand("RETR c.txt");
+            client.sendCommand("LIST V");
             client.sendCommand("DONE");
         } catch (IOException e) {
             client.closeConnection();
@@ -111,10 +114,11 @@ class Client {
         }
 
         if (command.cmd.equals("RETR")) {
-            if (!s.equals("-File doesn't exist")) {
+            if (s.charAt(0) != '-') {
                 this.filesize = Integer.valueOf(s);
                 File file = new File(this.dir + command.args[0]);
 
+                // Automatically send stop command if file already exists on client.
                 if (file.exists()) {
                     this.sendCommand("STOP");
                     return;

@@ -410,7 +410,7 @@ class Command {
     void stor() {
         try {
             // First check that an arg was given.
-            if (checkArguments(1)) {
+            if (checkArguments(2)) {
                 return;
             }
 

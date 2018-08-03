@@ -43,63 +43,85 @@ class Client extends Thread {
 
         try {
             // Continue to wait for commands until the NULL terminating character has been sent.
+            String s;
+            boolean bSkipCommand = false;
             //noinspection InfiniteLoopStatement
             while(true) {
-                String s = this.readCommand();
+                s = this.readCommand();
                 // Check to see if we have read in a command.
                 if (s.length() > 0) {
                     // Deal with the current command being sent.
                     command = new Command(this, s);
                     System.out.println(user.id + ": requested command: " + command.cmd);
 
-                    switch (command.cmd) {
-                        case "USER":
-                            command.user();
-                            break;
-                        case "ACCT":
-                            command.acct();
-                            break;
-                        case "PASS":
-                            command.pass();
-                            break;
-                        case "TYPE":
-                            command.type();
-                            break;
-                        case "LIST":
-                            command.list();
-                            break;
-                        case "CDIR":
-                            command.cdir();
-                            break;
-                        case "KILL":
-                            command.kill();
-                            break;
-                        case "NAME":
-                            command.name();
-                            break;
-                        case "TOBE":
-                            command.tobe();
-                            break;
-                        case "DONE":
-                            command.done();
-                            return;
-                        case "RETR":
-                            command.retr();
-                            break;
-                        case "SEND":
-                            command.send();
-                            break;
-                        case "STOP":
-                            command.stop();
-                            break;
-                        case "STOR":
-                            command.stor();
-                            break;
-                        case "SIZE":
-                            command.size();
-                            break;
+                    if (previousCommand != null) {
+                        switch (previousCommand.cmd) {
+                            case "NAME":
+                                if (!command.cmd.equals("TOBE")) {
+                                    this.writeOutput("-File wasn't renamed because command was not TOBE");
+                                    bSkipCommand = true;
+                                }
+                                break;
+                            case "RETR":
+                                if (!command.cmd.equals("SEND") && !command.cmd.equals("STOP")) {
+                                    this.writeOutput("-File wasn't sent because command was not SEND or STOP");
+                                    bSkipCommand = true;
+                                }
+                                break;
+                        }
+                    }
+
+                    if (!bSkipCommand) {
+                        switch (command.cmd) {
+                            case "USER":
+                                command.user();
+                                break;
+                            case "ACCT":
+                                command.acct();
+                                break;
+                            case "PASS":
+                                command.pass();
+                                break;
+                            case "TYPE":
+                                command.type();
+                                break;
+                            case "LIST":
+                                command.list();
+                                break;
+                            case "CDIR":
+                                command.cdir();
+                                break;
+                            case "KILL":
+                                command.kill();
+                                break;
+                            case "NAME":
+                                command.name();
+                                break;
+                            case "TOBE":
+                                command.tobe();
+                                break;
+                            case "DONE":
+                                command.done();
+                                return;
+                            case "RETR":
+                                command.retr();
+                                break;
+                            case "SEND":
+                                command.send();
+                                break;
+                            case "STOP":
+                                command.stop();
+                                break;
+                            case "STOR":
+                                command.stor();
+                                break;
+                            case "SIZE":
+                                command.size();
+                                break;
+                        }
                     }
                     this.previousCommand = command;
+                    bSkipCommand = false;
                 }
             }
         } catch (IOException e) {
