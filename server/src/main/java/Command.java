@@ -1,9 +1,6 @@
 import org.apache.commons.io.comparator.NameFileComparator;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +13,7 @@ class Command {
     private Client client;
     String cmd;
     private String[] args;
+    private File file;
 
     Command(Client client, String command) {
         this.client = client;
@@ -24,6 +22,7 @@ class Command {
         if (command.length() > 4) {
             this.args = command.substring(5, command.length()).split(" ");
         }
+        this.file = null;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -415,13 +414,53 @@ class Command {
             }
 
             if (client.isAuthenticated()) {
-                System.out.println("hsello");
+                File file = new File(this.client.currentDir + args[1]);
+                switch (args[0]) {
+                   case "NEW":
+                       if (file.exists()) {
+                           this.client.writeOutput("+File exists, will create new generation of file");
+                           String fileName = this.client.currentDir + args[1];
+                           int i = 1;
+                           while (file.exists()) {
+                               fileName = fileName.substring(0, fileName.lastIndexOf('.')) + "-" + String.valueOf(i) + fileName.substring(fileName.lastIndexOf('.'));
+                               file = new File(fileName);
+                               i++;
+
+                               if (i > 1000) {
+                                   this.client.writeOutput("-File exists, but system doesn't support generations");
+                                   return;
+                               }
+                           }
+                       } else {
+                           this.client.writeOutput("+File does not exist, will create new file");
+                       }
+                       break;
+                   case "OLD":
+                       if (file.exists()) {
+                           this.client.writeOutput("+Will write over old file");
+                       } else {
+                           this.client.writeOutput("+Will create new file");
+                       }
+                       break;
+                   case "APP":
+                       if (file.exists()) {
+                           this.client.writeOutput("+Will append to file");
+                       } else  {
+                           this.client.writeOutput("+Will create file");
+                       }
+                       break;
+                   default:
+                       this.client.writeOutput("-Storage mode not valid");
+                       return;
+                }
+                this.file = file;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    @SuppressWarnings("IfCanBeSwitch")
     void size() {
         try {
             // First check that an arg was given.
@@ -430,7 +469,45 @@ class Command {
             }
 
             if (client.isAuthenticated()) {
-                System.out.println("hello");
+                if (this.client.previousCommand.file == null) {
+                    this.client.writeOutput("-Couldn't save because previous command was not STOR or STOR command failed");
+                    return;
+                }
+
+                int fileSize = Integer.valueOf(args[0]);
+                if (this.client.previousCommand.args[0].equals("APP")) {
+                    fileSize = (int) (this.client.previousCommand.file.length() + fileSize);
+                }
+
+                if ((new File(this.client.currentDir)).getUsableSpace() < fileSize) {
+                    this.client.writeOutput("-Not enough room, don't send it");
+                    return;
+                } else {
+                    this.client.writeOutput("+ok, waiting for file");
+                }
+
+                File file = this.client.previousCommand.file;
+                FileOutputStream out;
+                if (this.client.previousCommand.args[0].equals("NEW") || this.client.previousCommand.args[0].equals("OLD")) {
+                    out = new FileOutputStream(file);
+                } else if (this.client.previousCommand.args[0].equals("APP")) {
+                    out = new FileOutputStream(file, true);
+                } else {
+                    this.client.writeOutput("-Storage mode not valid");
+                    return;
+                }
+
+                while (file.length() < fileSize) {
+                    out.write(this.client.input.read());
+                }
+                out.close();
+                this.client.writeOutput("+Saved " + file.getName());
+            }
+        } catch (NumberFormatException e) {
+            try {
+                this.client.writeOutput("-File size not valid integer");
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
         } catch (IOException e) {
             e.printStackTrace();

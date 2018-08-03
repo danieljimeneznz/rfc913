@@ -6,7 +6,7 @@ class Client extends Thread {
     User user;
     private boolean bIsAuthenticated;
     private Socket socket;
-    private BufferedReader input;
+    BufferedReader input;
     DataOutputStream output;
     String mountDir;
     String currentDir;
@@ -68,6 +68,11 @@ class Client extends Thread {
                                     bSkipCommand = true;
                                 }
                                 break;
+                            case "STOR":
+                                if (!command.cmd.equals("SIZE")) {
+                                    this.writeOutput("-File wasn't stored because command was not SIZE");
+                                    bSkipCommand = true;
+                                }
                         }
                     }
 

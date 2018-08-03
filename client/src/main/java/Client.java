@@ -14,7 +14,8 @@ class Client {
     private BufferedReader input;
     private String dir;
     private Command previousCommand;
-    private int filesize;
+    private int fileSize;
+    private File file;
 
     private Client() throws IOException {
         this.userIn = new BufferedReader(new InputStreamReader(System.in));
@@ -61,6 +62,21 @@ class Client {
             client.sendCommand("SEND");
             client.sendCommand("RETR c.txt");
             client.sendCommand("LIST V");
+            client.sendCommand("STOR NEW blah.txt");
+            client.sendCommand("SIZE 28");
+            client.sendCommand("SIZE 68");
+            client.sendCommand("STOR OLD test.txt");
+            client.sendCommand("SIZE 17");
+            client.sendCommand("STOR APP test.txt");
+            client.sendCommand("SIZE 17");
+            client.sendCommand("STOR NEW test.txt");
+            client.sendCommand("SIZE 17");
+            client.sendCommand("RETR test-1.txt");
+            client.sendCommand("SEND");
+            client.sendCommand("STOR APP test-1.txt");
+            client.sendCommand("SIZE 17");
+            client.sendCommand("STOR OLD test-1.txt");
+            client.sendCommand("SIZE 17");
             client.sendCommand("DONE");
         } catch (IOException e) {
             client.closeConnection();
@@ -92,16 +108,38 @@ class Client {
         return s.toString();
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void sendCommand(String cmd) throws IOException {
         Command command = new Command(cmd);
+        File file = null;
         System.out.println("Sending command: " + cmd);
+
+        if (command.cmd.equals("STOR")) {
+            file = new File(this.dir + command.args[1]);
+            if (!file.exists()) {
+                System.out.println("-File does not exist on client");
+                return;
+            }
+        }
+        if (command.cmd.equals("SIZE")) {
+            if (this.previousCommand.cmd.equals("STOR")) {
+                file = new File(this.dir + this.previousCommand.args[1]);
+                if (!file.exists()) {
+                    System.out.println("-File does not exist on client");
+                    return;
+                }
+            } else {
+                System.out.println("-Couldn't save because previous command was not STOR or STOR command failed");
+                return;
+            }
+        }
         this.output.writeBytes(cmd + "\0");
 
         if (command.cmd.equals("SEND") && !this.previousCommand.cmd.equals("STOP")) {
-            File file = new File(this.dir + this.previousCommand.args[0]);
+            file = new File(this.dir + this.previousCommand.args[0]);
             FileOutputStream out = new FileOutputStream(file);
 
-            while (file.length() < this.filesize) {
+            while (file.length() < this.fileSize) {
                 out.write(this.input.read());
             }
             out.close();
@@ -115,8 +153,8 @@ class Client {
 
         if (command.cmd.equals("RETR")) {
             if (s.charAt(0) != '-') {
-                this.filesize = Integer.valueOf(s);
-                File file = new File(this.dir + command.args[0]);
+                this.fileSize = Integer.valueOf(s);
+                file = new File(this.dir + command.args[0]);
 
                 // Automatically send stop command if file already exists on client.
                 if (file.exists()) {
@@ -124,12 +162,39 @@ class Client {
                     return;
                 }
 
-                if ((new File(dir)).getUsableSpace() < this.filesize) {
+                if ((new File(dir)).getUsableSpace() < this.fileSize) {
                     this.sendCommand("STOP");
                     return;
                 }
             }
         }
+
+        if (command.cmd.equals("STOR")) {
+            if (s.charAt(0) != '-') {
+                this.file = file;
+            }
+        }
+
+        if (command.cmd.equals("SIZE")) {
+            if (s.charAt(0) != '-') {
+                // Send file to server.
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(this.file));
+
+                int data;
+                // Read and send file until the whole file has been sent
+                while ((data = bufferedInputStream.read()) != -1) {
+                    this.output.write(data);
+                }
+                bufferedInputStream.close();
+                this.output.flush();
+
+                s = Client.readInput(this.input);
+                if (s.length() > 0) {
+                    System.out.println(s);
+                }
+            }
+        }
+
         this.previousCommand = command;
     }
 
