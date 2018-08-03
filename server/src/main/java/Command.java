@@ -1,6 +1,8 @@
 import org.apache.commons.io.comparator.NameFileComparator;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -184,38 +186,36 @@ class Command {
                     return;
                 }
 
-                this.client.writeOutput("+" + directory);
-                if (files == null) {
-                    return;
-                }
-
-                Arrays.sort(files, NameFileComparator.NAME_COMPARATOR);
                 StringBuilder response = new StringBuilder();
-                // We now have the correct directory path to perform the LIST command on.
-                switch (args[0]) {
-                    case "F":
-                        for (int i = 0; i < files.length; i++) {
-                            response.append(files[i].getName());
-                            if (i != files.length - 1) {
-                                response.append("\n");
+                response.append("+").append(directory);
+                if (files != null && files.length > 0) {
+                    response.append("\n");
+                    Arrays.sort(files, NameFileComparator.NAME_COMPARATOR);
+                    // We now have the correct directory path to perform the LIST command on.
+                    switch (args[0]) {
+                        case "F":
+                            for (int i = 0; i < files.length; i++) {
+                                response.append(files[i].getName());
+                                if (i != files.length - 1) {
+                                    response.append("\n");
+                                }
                             }
-                        }
-                        this.client.writeOutput(response.toString());
-                        break;
-                    case "V":
-                        // Verbose output = filename    size    modified time   owner
-                        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                        for (int i = 0; i < files.length; i++) {
-                            Path path = Paths.get(files[i].getAbsolutePath());
-                            FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-                            response.append(files[i].getName()).append("\t").append(files[i].length()).append("\t").append(sdf.format(files[i].lastModified())).append("\t").append(ownerAttributeView.getOwner());
-                            if (i != files.length - 1) {
-                                response.append("\n");
+                            break;
+                        case "V":
+                            // Verbose output = filename    size    modified time   owner
+                            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                            for (int i = 0; i < files.length; i++) {
+                                Path path = Paths.get(files[i].getAbsolutePath());
+                                FileOwnerAttributeView ownerAttributeView = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+                                response.append(files[i].getName()).append("\t").append(files[i].length()).append("\t").append(sdf.format(files[i].lastModified())).append("\t").append(ownerAttributeView.getOwner());
+                                if (i != files.length - 1) {
+                                    response.append("\n");
+                                }
                             }
-                        }
-                        this.client.writeOutput(response.toString());
-                        break;
+                            break;
+                    }
                 }
+                this.client.writeOutput(response.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -241,7 +241,7 @@ class Command {
 
             File folder = new File(directory);
             if (folder.exists() && folder.isDirectory()) {
-                if (!client.isAuthenticated()) {
+                if (!client.checkAuthentication()) {
                     this.client.writeOutput("+Directory ok, send account/password");
                 } else {
                     this.client.currentDir = directory;
@@ -318,6 +318,7 @@ class Command {
                 File file = new File(this.client.currentDir + this.client.previousCommand.args[0]);
                 if (!file.exists()) {
                     this.client.writeOutput("-Can't find " + this.client.previousCommand.args[0]);
+                    return;
                 }
 
                 // Rename file.
@@ -350,7 +351,56 @@ class Command {
             }
 
             if (client.isAuthenticated()) {
-                System.out.println("helelo");
+                File file = new File(this.client.currentDir + args[0]);
+
+                if (!file.exists()) {
+                    this.client.writeOutput("-File doesn't exist");
+                } else {
+                    this.client.writeOutput(String.valueOf(file.length()));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void send() {
+        try {
+            if (client.isAuthenticated()) {
+                if (this.client.previousCommand.cmd.equals("RETR")) {
+                    File file = new File(this.client.currentDir + this.client.previousCommand.args[0]);
+
+                    if (!file.exists()) {
+                        this.client.writeOutput("-File doesn't exist");
+                    } else {
+                        // Send file to client.
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+
+                        int data;
+                        // Read and send file until the whole file has been sent
+                        while ((data = bufferedInputStream.read()) != -1) {
+                            this.client.output.write(data);
+                        }
+                        bufferedInputStream.close();
+                        this.client.output.flush();
+                    }
+                } else {
+                    this.client.writeOutput("-Client did not send RETR command before");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void stop() {
+        try {
+            if (client.isAuthenticated()) {
+                if (this.client.previousCommand.cmd.equals("RETR")) {
+                    this.client.writeOutput("+ok, RETR aborted");
+                } else {
+                    this.client.writeOutput("-Client did not send RETR command before");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -366,6 +416,21 @@ class Command {
 
             if (client.isAuthenticated()) {
                 System.out.println("hsello");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void size() {
+        try {
+            // First check that an arg was given.
+            if (checkArguments(1)) {
+                return;
+            }
+
+            if (client.isAuthenticated()) {
+                System.out.println("hello");
             }
         } catch (IOException e) {
             e.printStackTrace();

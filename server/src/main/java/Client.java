@@ -7,7 +7,7 @@ class Client extends Thread {
     private boolean bIsAuthenticated;
     private Socket socket;
     private BufferedReader input;
-    private DataOutputStream output;
+    DataOutputStream output;
     String mountDir;
     String currentDir;
     String transmissionType;
@@ -45,12 +45,12 @@ class Client extends Thread {
             // Continue to wait for commands until the NULL terminating character has been sent.
             //noinspection InfiniteLoopStatement
             while(true) {
-                int c = this.input.read();
-                String s = this.readCommand(c);
+                String s = this.readCommand();
                 // Check to see if we have read in a command.
                 if (s.length() > 0) {
                     // Deal with the current command being sent.
                     command = new Command(this, s);
+                    System.out.println(user.id + ": requested command: " + command.cmd);
 
                     switch (command.cmd) {
                         case "USER":
@@ -86,17 +86,20 @@ class Client extends Thread {
                         case "RETR":
                             command.retr();
                             break;
+                        case "SEND":
+                            command.send();
+                            break;
+                        case "STOP":
+                            command.stop();
+                            break;
                         case "STOR":
                             command.stor();
                             break;
+                        case "SIZE":
+                            command.size();
+                            break;
                     }
                     this.previousCommand = command;
-                }
-                // Check to see if the client is still connected.
-                if (c == -1) {
-                    this.closeConnection();
-                    this.interrupt();
-                    return;
                 }
             }
         } catch (IOException e) {
@@ -118,13 +121,20 @@ class Client extends Thread {
      * @return              the string the user has input
      * @throws IOException  an exception if error reading has occurred.
      */
-    private String readCommand(int i) throws IOException {
+    private String readCommand() throws IOException {
         StringBuilder s = new StringBuilder();
-        int c = i;
+        int c = input.read();
 
         while (c > 0) {
             s.append(String.valueOf((char)c));
             c = input.read();
+        }
+
+        // Check to see if the client is still connected.
+        if (c == -1) {
+            this.closeConnection();
+            this.interrupt();
+            return "";
         }
 
         return s.toString();
