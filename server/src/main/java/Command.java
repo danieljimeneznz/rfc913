@@ -422,8 +422,8 @@ class Command {
                            String fileName = this.client.currentDir + args[1];
                            int i = 1;
                            while (file.exists()) {
-                               fileName = fileName.substring(0, fileName.lastIndexOf('.')) + "-" + String.valueOf(i) + fileName.substring(fileName.lastIndexOf('.'));
-                               file = new File(fileName);
+                               String newFileName = fileName.substring(0, fileName.lastIndexOf('.')) + "-" + String.valueOf(i) + fileName.substring(fileName.lastIndexOf('.'));
+                               file = new File(newFileName);
                                i++;
 
                                if (i > 1000) {
