@@ -19,25 +19,32 @@ class Client {
     private int fileSize;
     private File file;
 
+    /**
+     * Create a new client object
+     * @throws IOException  an error to do with the socket.
+     */
     Client() throws IOException {
         this.userIn = new BufferedReader(new InputStreamReader(System.in));
         this.socket = new Socket("localhost", 1155);
         this.output = new DataOutputStream(socket.getOutputStream());
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.dir = System.getProperty("user.dir") + "/mnt/";
-
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String argv[]) throws Exception {
+        // Create the new client instance that will connect to the server.
         Client client = new Client();
         try {
+            // Read the first response from the server.
             System.out.println(Client.readInput(client.input));
             String command;
 
+            // Listen for commands and send them to the server.
             while(true) {
                 command = client.userIn.readLine();
                 client.sendCommand(command);
+                // When the user has finished, close the connection and exit gracefully.
                 if (command.equals("DONE")) {
                     client.closeConnection();
                     System.exit(0);
@@ -73,12 +80,19 @@ class Client {
         return s.toString();
     }
 
+    /**
+     * This method sends the command to the server. It also listens to responses from the server and handles
+     * file uploads/downloads.
+     * @param cmd   the command to be sent to the server
+     * @throws IOException an exception if and error has occurred.
+     */
     @SuppressWarnings("ConstantConditions")
     void sendCommand(String cmd) throws IOException {
         Command command = new Command(cmd);
         File file = null;
         if (DEBUG) System.out.println("Sending command: " + cmd);
 
+        // Check that the file to be sent actually exists.
         if (command.cmd.equals("STOR")) {
             file = new File(this.dir + command.args[1]);
             if (!file.exists()) {
@@ -86,6 +100,8 @@ class Client {
                 return;
             }
         }
+
+        // Check that the file to be sent actually exists.
         if (command.cmd.equals("SIZE")) {
             if (this.previousCommand.cmd.equals("STOR")) {
                 file = new File(this.dir + this.previousCommand.args[1]);
@@ -98,8 +114,11 @@ class Client {
                 return;
             }
         }
+
+        // SEND THE COMMAND.
         this.output.writeBytes(cmd + "\0");
 
+        // Receive the file being sent from the server.
         if (command.cmd.equals("SEND") && !this.previousCommand.cmd.equals("STOP")) {
             file = new File(this.dir + this.previousCommand.args[0]);
             FileOutputStream out = new FileOutputStream(file);
@@ -111,11 +130,13 @@ class Client {
             return;
         }
 
+        // Wait for a response from the server.
         String s = Client.readInput(this.input);
         if (s.length() > 0) {
             System.out.println(s);
         }
 
+        // Check to see that the RETR command succeeded and if it does, get the file size to be sent from the server.
         if (command.cmd.equals("RETR")) {
             if (s.charAt(0) != '-') {
                 this.fileSize = Integer.valueOf(s);
@@ -127,6 +148,7 @@ class Client {
                     return;
                 }
 
+                // Automatically send stop command if there is not enough space available on client.
                 if ((new File(dir)).getUsableSpace() < this.fileSize) {
                     this.sendCommand("STOP");
                     return;
@@ -134,12 +156,14 @@ class Client {
             }
         }
 
+        // Check to see if STOR command succeeded and set the file.
         if (command.cmd.equals("STOR")) {
             if (s.charAt(0) != '-') {
                 this.file = file;
             }
         }
 
+        // Start sending the file to the server if the client specified the SIZE command.
         if (command.cmd.equals("SIZE")) {
             if (s.charAt(0) != '-') {
                 // Send file to server.
@@ -163,6 +187,10 @@ class Client {
         this.previousCommand = command;
     }
 
+    /**
+     * Close the connection to the server.
+     * @throws IOException  an exception if an error occurred.
+     */
     void closeConnection() throws IOException {
         userIn.close();
         output.close();
@@ -180,6 +208,10 @@ class Command {
     String cmd;
     String[] args;
 
+    /**
+     * Create a new command that contains information regarding what the user has typed.
+     * @param command   the command that was sent (as a string).
+     */
     Command(String command) {
         try {
             this.cmd = command.substring(0, 4);

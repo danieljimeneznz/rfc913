@@ -8,6 +8,10 @@ class User {
     String acct;
     String pass;
 
+    /**
+     * Decrypts the password from its BASE64 encoding.
+     * @return  the decrypted password.
+     */
     String decryptPassword() {
         return new String(Base64.getDecoder().decode(this.pass));
     }

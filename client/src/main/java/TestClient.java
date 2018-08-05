@@ -1,5 +1,8 @@
 import java.io.IOException;
 
+/**
+ * Class used for testing the server by simulating commands written by a client.
+ */
 public class TestClient {
     public static void main(String argv[]) throws Exception {
         Client client = new Client();

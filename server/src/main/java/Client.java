@@ -18,9 +18,14 @@ class Client extends Thread {
     String transmissionType;
     Command previousCommand;
 
-
+    /**
+     * Client constructor
+     * @param socket    the socket with which to contact the client on.
+     * @throws IOException  exception when client socket is closed.
+     */
     Client(Socket socket) throws IOException {
         System.out.println("Client connected on socket: " + String.valueOf(socket.getPort()));
+        // Initialise instance variables.
         this.socket = socket;
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.output = new DataOutputStream(socket.getOutputStream());
@@ -43,6 +48,9 @@ class Client extends Thread {
         }
     }
 
+    /**
+     * Main command that runs the client in the thread.
+     */
     public void run() {
         Command command;
 
@@ -59,6 +67,7 @@ class Client extends Thread {
                     command = new Command(this, s);
                     if (DEBUG) System.out.println(user.id + ": requested command: " + command.cmd);
 
+                    // Check what the previous command was so that commands that have to be ordered will do so.
                     if (previousCommand != null) {
                         switch (previousCommand.cmd) {
                             case "NAME":
@@ -81,6 +90,7 @@ class Client extends Thread {
                         }
                     }
 
+                    // Perform the action based on the user command.
                     if (!bSkipCommand) {
                         switch (command.cmd) {
                             case "USER":
@@ -139,6 +149,10 @@ class Client extends Thread {
         }
     }
 
+    /**
+     * Closes the connection to the client and ensures the socket is freed.
+     * @throws IOException exception when client socket is closed.
+     */
     void closeConnection() throws IOException {
         System.out.println("Client disconnected on socket: " + String.valueOf(this.socket.getPort()));
         this.socket.close();
@@ -172,10 +186,19 @@ class Client extends Thread {
         return s.toString();
     }
 
+    /**
+     * Write the message to the client output stream.
+     * @param message   the message to send to the client.
+     * @throws IOException  an exception if error writing has occurred.
+     */
     void writeOutput(String message) throws IOException {
         this.output.writeBytes(message + '\0');
     }
 
+    /**
+     * Checks to see if the current user is authenticated and if not, informs the client that they are not
+     * @return  whether the user is authenticated.
+     */
     @SuppressWarnings("ConstantConditions")
     boolean isAuthenticated() {
         try {
@@ -191,6 +214,10 @@ class Client extends Thread {
         }
     }
 
+    /**
+     * Checks the authentication status of the user and re-evaluates whether the user is authenticated or not.
+     * @return  whether the user is authenticated.
+     */
     @SuppressWarnings("ConstantConditions")
     boolean checkAuthentication() {
         // Test to see if the user is authenticated by checking each of the user values specified against those

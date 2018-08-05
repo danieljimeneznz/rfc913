@@ -25,11 +25,16 @@ class Server {
         //noinspection InfiniteLoopStatement
         while (true) {
             Socket s = socket.accept();
+            // Create a new client thread and start it.
             Client client = new Client(s);
             client.start();
         }
     }
 
+    /**
+     * Get a list of users that can login to the server from the JSON file.
+     * @return  the users object.
+     */
     static Users getUsers() {
         try {
             Reader reader = new InputStreamReader(Server.class.getResourceAsStream("/users.json"));
