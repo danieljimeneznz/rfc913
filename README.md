@@ -1,5 +1,6 @@
 # RFC913 Simple File Transfer Protocol
 RFC913 Simple File Transfer Protocol Implementation for COMPSYS 725.
+[GitHub](https://github.com/hydroflax/rfc913)
 
 The following project makes use of maven to manage dependencies and run the
 client/server.
