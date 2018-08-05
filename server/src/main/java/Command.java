@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 class Command {
+    private boolean DEBUG = false;
     private Client client;
     String cmd;
     private String[] args;
@@ -18,7 +19,17 @@ class Command {
     Command(Client client, String command) {
         this.client = client;
 
-        this.cmd = command.substring(0, 4);
+        try {
+            this.cmd = command.substring(0, 4);
+        } catch (StringIndexOutOfBoundsException e) {
+            try {
+                this.cmd = "";
+                this.client.writeOutput("-Invalid Command length");
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return;
+        }
         if (command.length() > 4) {
             this.args = command.substring(5, command.length()).split(" ");
         }
@@ -38,7 +49,7 @@ class Command {
             User u = users.getUserByID(args[0]);
             if (u == null) {
                 // User does not exist.
-                System.out.println(args[0] + ": invalid user-id attempted to log in to server");
+                if (DEBUG) System.out.println(args[0] + ": invalid user-id attempted to log in to server");
                 this.client.writeOutput("-Invalid user-id, try again");
                 return;
             }
@@ -46,12 +57,12 @@ class Command {
             this.client.user.id = u.id;
             if (u.pass.equals("") || this.client.checkAuthentication()) {
                 this.client.user = u;
-                System.out.println(u.id + ": authenticated with server");
+                if (DEBUG) System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!" + u.id + " logged in");
                 return;
             }
 
-            System.out.println(u.id + ": sent user id to server");
+            if (DEBUG) System.out.println(u.id + ": sent user id to server");
             if (this.client.user.acct != null) {
                 this.client.writeOutput("+User-id valid, send password");
             } else {
@@ -74,7 +85,7 @@ class Command {
             User u = users.getUserByAcct(args[0]);
             if (u == null) {
                 // User does not exist.
-                System.out.println(args[0] + ": invalid account attempted to log in to server");
+                if (DEBUG) System.out.println(args[0] + ": invalid account attempted to log in to server");
                 this.client.writeOutput("-Invalid account, try again");
                 return;
             }
@@ -82,12 +93,12 @@ class Command {
             this.client.user.acct = u.acct;
             if (this.client.checkAuthentication()) {
                 this.client.user = u;
-                System.out.println(u.id + ": authenticated with server");
+                if (DEBUG) System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!Account valid, logged-in");
                 return;
             }
 
-            System.out.println(u.id + ": sent account to server");
+            if (DEBUG) System.out.println(u.id + ": sent account to server");
             this.client.writeOutput("+Account valid, send password");
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,7 +115,7 @@ class Command {
 
             this.client.user.pass = args[0];
             if (this.client.checkAuthentication()) {
-                System.out.println(this.client.user.id + ": authenticated with server");
+                if (DEBUG) System.out.println(this.client.user.id + ": authenticated with server");
                 this.client.writeOutput("!Logged in");
                 return;
             }
@@ -112,7 +123,7 @@ class Command {
             // Check password against those in list if client hasn't specified an account.
             Users users = Server.getUsers();
             if (users.checkPass(args[0])) {
-                System.out.println("User password correct but no user specified");
+                if (DEBUG) System.out.println("User password correct but no user specified");
                 this.client.writeOutput("+Send account");
                 return;
             }
@@ -294,6 +305,8 @@ class Command {
                 File file = new File(this.client.currentDir + args[0]);
                 if (!file.exists()) {
                     this.client.writeOutput("-Can't find " + args[0]);
+                } else {
+                    this.client.writeOutput("+File exists");
                 }
             }
         } catch (IOException e) {
@@ -516,7 +529,7 @@ class Command {
 
     private boolean checkArguments(int amount) throws IOException {
         // First check that the arg was given.
-        if (args.length < amount) {
+        if (args == null || args.length < amount) {
             this.client.writeOutput("-Invalid amount of arguments given");
             return true;
         }

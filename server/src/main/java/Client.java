@@ -1,8 +1,13 @@
-import java.io.*;
-import java.net.*;
-import java.util.Properties;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.Socket;
 
+@SuppressWarnings("FieldCanBeLocal")
 class Client extends Thread {
+    private boolean DEBUG = true;
     User user;
     private boolean bIsAuthenticated;
     private Socket socket;
@@ -52,7 +57,7 @@ class Client extends Thread {
                 if (s.length() > 0) {
                     // Deal with the current command being sent.
                     command = new Command(this, s);
-                    System.out.println(user.id + ": requested command: " + command.cmd);
+                    if (DEBUG) System.out.println(user.id + ": requested command: " + command.cmd);
 
                     if (previousCommand != null) {
                         switch (previousCommand.cmd) {
