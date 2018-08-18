@@ -9,6 +9,10 @@ For each of the respective components (i.e. server/client) there is a `mnt` dire
 This directory is treated as the root of the filesystem on the server to ensure that clients are only allowed to transfer files from within that dir.
 If required, this can be modified by changing the `mountDir` in the server's `Client` class.
 
+To easily test the application run the commands in the 'To simulate a client' section of this
+README. Correct Server responses can be found in comments alongside the commands being sent in
+the `client/src/main/java/TestClient.java` file.
+
 ## Prerequisites
 - Java 1.8
 - Maven 3
