@@ -67,6 +67,7 @@ class Command {
             this.client.user.id = u.id;
             if (u.pass.equals("") || this.client.checkAuthentication()) {
                 this.client.user = u;
+                this.client.user.pass = u.decryptPassword();
                 if (DEBUG) System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!" + u.id + " logged in");
                 return;
@@ -108,6 +109,7 @@ class Command {
             this.client.user.acct = u.acct;
             if (this.client.checkAuthentication()) {
                 this.client.user = u;
+                this.client.user.pass = u.decryptPassword();
                 if (DEBUG) System.out.println(u.id + ": authenticated with server");
                 this.client.writeOutput("!Account valid, logged-in");
                 return;

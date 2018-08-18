@@ -9,7 +9,7 @@ import java.net.*;
 
 @SuppressWarnings("FieldCanBeLocal")
 class Client {
-    private boolean DEBUG = true;
+    private boolean DEBUG = false;
     private BufferedReader userIn;
     private Socket socket;
     private DataOutputStream output;

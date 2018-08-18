@@ -7,7 +7,7 @@ import java.net.Socket;
 
 @SuppressWarnings("FieldCanBeLocal")
 class Client extends Thread {
-    private boolean DEBUG = true;
+    private boolean DEBUG = false;
     User user;
     private boolean bIsAuthenticated;
     private Socket socket;

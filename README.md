@@ -1,5 +1,5 @@
 # RFC913 Simple File Transfer Protocol
-RFC913 Simple File Transfer Protocol Implementation for COMPSYS 725.
+[RFC913](https://tools.ietf.org/html/rfc913) Simple File Transfer Protocol Implementation for COMPSYS 725.
 [GitHub](https://github.com/hydroflax/rfc913)
 
 The following project makes use of maven to manage dependencies and run the
@@ -36,3 +36,21 @@ mvn exec:java -Dexec.mainClass="TestClient"
 ```
 
 This sends a list of commands to the server so that the responses can be easily inspected.
+It also outputs the sent command to console to easily see the command being sent before the
+server output is shown.
+
+## Architecture
+### Server
+The server runs by continuously listening for client connections.
+Once a client has connected, the server spins up a new thread and
+listens for commands. When a command comes in, if it exists in the list
+of supported commands then this command and context is passed to a new
+command object which will handle the request for the client, replying
+to the client as needed.
+
+### Client
+The client runs by first connecting to the server on the pre-determined port.
+It then listens for user input on the command line and sends these commands
+to the server. For some of the commands (such as 'STOR', 'RETR', etc.) the client
+will run some validation on the command to ensure that the correct command is being sent
+or the file a user wishes to send actually exists in the folder.
